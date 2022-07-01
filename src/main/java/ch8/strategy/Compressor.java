@@ -1,5 +1,6 @@
 package ch8.strategy;
 
+import ch8.Run;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,8 +13,13 @@ public class Compressor {
     }
 
     public void compress(Path inFile, File outFile) throws IOException {
+        FileInputStream fis = new FileInputStream(inFile.toFile());
         try(OutputStream outputStream = new FileOutputStream(outFile)){
-            Files.copy(inFile, strategy.compress(outputStream));
+            byte[] buffer = new byte[1024];
+            int len;
+            while ((len = fis.read(buffer)) > 0) {
+                outputStream.write(buffer, 0, len);
+            }
         }
     }
 }
