@@ -12,6 +12,6 @@ public class ZipCompressionStrategy implements CompressionStrategy {
     public OutputStream compress(OutputStream data) throws IOException {
         ZipOutputStream gos = new ZipOutputStream(data);
         gos.putNextEntry(new ZipEntry("outZip"));
-        return new ZipOutputStream(data);
+        return gos;
     }
 }

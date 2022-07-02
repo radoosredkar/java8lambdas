@@ -1,5 +1,9 @@
 package ch8;
 
+import ch7.observer.Aliens;
+import ch7.observer.LandingObserver;
+import ch7.observer.Moon;
+import ch7.observer.Nasa;
 import ch8.command.Editor;
 import ch8.command.EditorImpl;
 import ch8.command.Macro;
@@ -19,6 +23,7 @@ import java.util.zip.ZipOutputStream;
 public class Run {
 
     public static void main(String[] args) throws IOException {
+        //Command pattern
         Macro macro = new Macro();
         Editor editor = new EditorImpl("Rado");
         Editor editor1 = new EditorImpl("Vladka");
@@ -42,35 +47,33 @@ public class Run {
         macro.record(editor1::close);
         macro.run();
 
-        /*try (
-            GZIPOutputStream gos = new GZIPOutputStream(new FileOutputStream("/tmp/out.gz"));
-            FileInputStream fis = new FileInputStream(Run.class.getResource("/toCompress").getFile());
-        ){
-            byte[] buffer = new byte[1024];
-            int len;
-            while ((len = fis.read(buffer)) > 0) {
-                gos.write(buffer, 0, len);
-            }
-        }
-
-        try (
-            ZipOutputStream gos = new ZipOutputStream(new FileOutputStream("/tmp/out.zip"));
-            FileInputStream fis = new FileInputStream(Run.class.getResource("/toCompress").getFile());
-        ){
-            gos.putNextEntry(new ZipEntry("1"));
-            byte[] buffer = new byte[1024];
-            int len;
-            while ((len = fis.read(buffer)) > 0) {
-                gos.write(buffer, 0, len);
-            }
-        }*/
-
-
-        //Compress
-        Compressor gzipCompressor = new Compressor(new GZipCompressionStrategy());
+        //Strategy pattern
+        //Compressor gzipCompressor = new Compressor(new GZipCompressionStrategy());
+        Compressor gzipCompressor = new Compressor(GZIPOutputStream::new);
         gzipCompressor.compress(new File(Run.class.getResource("/toCompress").getFile()).toPath(), new File("/tmp/out.gz"));
         Compressor zipCompressor = new Compressor(new ZipCompressionStrategy());
         zipCompressor.compress(new File(Run.class.getResource("/toCompress").getFile()).toPath(), new File("/tmp/out.zip"));
 
+        //Observer pattern
+        Moon moon = new Moon();
+        moon.startObserving(new Aliens());
+        moon.startObserving(new Nasa());
+        moon.land("an Asteroid");
+        moon.land("Apollo 11");
+
+        //Or
+        moon = new Moon();
+        moon.startObserving((name) -> {
+            if (name.contains("Asteroid")){
+                System.out.println("Good job landing on " + name);
+            }
+        });
+        moon.startObserving((name) -> {
+            if (name.contains("Apollo")){
+                System.out.println("They are distracted, let's invade Earth!");
+            }
+        });
+        moon.land("an Asteroid");
+        moon.land("Apollo 11");
     }
 }
